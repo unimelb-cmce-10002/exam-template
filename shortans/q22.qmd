@@ -1,29 +1,29 @@
-::: {.short-answer}
+::: {.short-answer points="12"}
 ### Question 22
 
-Placeholder short-answer question. This example has three subparts.
+Placeholder short-answer question with three subparts.
 
-::: {.part height="4.5cm"}
-Placeholder prompt for subpart one.
-
-::: {.answer}
-Placeholder solution for subpart one.
-:::
-:::
-
-::: {.part height="4.5cm"}
-Placeholder prompt for subpart two.
+::: {.part height="4cm" points="3"}
+Placeholder prompt for the first subpart.
 
 ::: {.answer}
-Placeholder solution for subpart two.
+Placeholder solution for the first subpart.
 :::
 :::
 
-::: {.part height="4.5cm"}
-Placeholder prompt for subpart three.
+::: {.part height="4cm" points="4"}
+Placeholder prompt for the second subpart.
 
 ::: {.answer}
-Placeholder solution for subpart three.
+Placeholder solution for the second subpart.
+:::
+:::
+
+::: {.part height="4cm" points="5"}
+Placeholder prompt for the third subpart.
+
+::: {.answer}
+Placeholder solution for the third subpart.
 :::
 :::
 :::

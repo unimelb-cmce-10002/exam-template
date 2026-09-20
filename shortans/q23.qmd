@@ -1,9 +1,9 @@
-::: {.short-answer}
+::: {.short-answer points="8"}
 ### Question 23
 
-Placeholder short-answer question. Subpart labels are generated automatically when the exam is compiled.
+Placeholder short-answer question with two subparts.
 
-::: {.part height="6cm"}
+::: {.part height="5cm" points="4"}
 Placeholder prompt for the first subpart.
 
 ::: {.answer}
@@ -11,7 +11,7 @@ Placeholder solution for the first subpart.
 :::
 :::
 
-::: {.part height="6cm"}
+::: {.part height="5cm" points="4"}
 Placeholder prompt for the second subpart.
 
 ::: {.answer}

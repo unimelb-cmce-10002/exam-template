@@ -1,0 +1,19 @@
+::: {.instructions-page}
+# Foundations of Business Analytics — Exam
+
+## Instructions
+
+Replace this page with the exam instructions. For example:
+
+- Answer all questions.
+- For each multiple-choice question, write one capital letter in the answer box.
+- Show working where appropriate in the short-answer section.
+- Write clearly within the space provided.
+
+```{=latex}
+\vfill
+\begin{center}
+\textit{Do not begin until instructed.}
+\end{center}
+```
+:::

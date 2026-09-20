@@ -1,37 +1,37 @@
-::: {.short-answer}
+::: {.short-answer points="16"}
 ### Question 24
 
-Placeholder short-answer question. This example shows four automatically labelled subparts.
+Placeholder short-answer question with four subparts.
 
-::: {.part height="3.5cm"}
-Placeholder prompt for subpart one.
-
-::: {.answer}
-Placeholder solution for subpart one.
-:::
-:::
-
-::: {.part height="3.5cm"}
-Placeholder prompt for subpart two.
+::: {.part height="3.5cm" points="4"}
+Placeholder prompt for the first subpart.
 
 ::: {.answer}
-Placeholder solution for subpart two.
+Placeholder solution for the first subpart.
 :::
 :::
 
-::: {.part height="3.5cm"}
-Placeholder prompt for subpart three.
-
-::: {.answer}
-Placeholder solution for subpart three.
-:::
-:::
-
-::: {.part height="3.5cm"}
-Placeholder prompt for subpart four.
+::: {.part height="3.5cm" points="4"}
+Placeholder prompt for the second subpart.
 
 ::: {.answer}
-Placeholder solution for subpart four.
+Placeholder solution for the second subpart.
+:::
+:::
+
+::: {.part height="3.5cm" points="4"}
+Placeholder prompt for the third subpart.
+
+::: {.answer}
+Placeholder solution for the third subpart.
+:::
+:::
+
+::: {.part height="3.5cm" points="4"}
+Placeholder prompt for the fourth subpart.
+
+::: {.answer}
+Placeholder solution for the fourth subpart.
 :::
 :::
 :::

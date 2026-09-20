@@ -2,29 +2,20 @@
 title: ""
 format: pdf
 student-number-header: true
+instructions-page: true
+first-page-number: 1
+mcq-points-per-question: 1
 mcq-answer-text: "Write your CAPITAL-letter answer in this box."
+mcq-section-title: "SECTION 1"
+short-answer-section-title: "SECTION 2"
+mcq-extra-pages: 1
+short-answer-extra-pages: 1
 ---
 
-# Foundations of Business Analytics — Exam
+{{< include instructions/instructions.qmd >}}
 
-## Instructions
-
-Replace this page with the exam instructions. For example:
-
-- Answer all questions.
-- For each multiple-choice question, write one capital letter in the answer box.
-- Show working where appropriate in the short-answer section.
-- Write clearly within the space provided.
-
-```{=latex}
-\vfill
-\begin{center}
-\textit{Do not begin until instructed.}
-\end{center}
-\newpage
-```
-
-## Multiple-choice questions
+::: {.section-heading section="mcq"}
+:::
 
 {{< include mcq/q01.qmd >}}
 {{< include mcq/q02.qmd >}}
@@ -47,9 +38,25 @@ Replace this page with the exam instructions. For example:
 {{< include mcq/q19.qmd >}}
 {{< include mcq/q20.qmd >}}
 
-## Short-answer questions
+::: {.section-end section="mcq"}
+:::
+
+::: {.extra-pages section="mcq"}
+:::
+
+::: {.section-heading section="short-answer"}
+:::
 
 {{< include shortans/q21.qmd >}}
 {{< include shortans/q22.qmd >}}
 {{< include shortans/q23.qmd >}}
 {{< include shortans/q24.qmd >}}
+
+::: {.section-end section="short-answer"}
+:::
+
+::: {.extra-pages section="short-answer"}
+:::
+
+::: {.exam-end}
+:::

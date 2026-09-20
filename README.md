@@ -1,76 +1,45 @@
-# Draft Quarto exam template
+# Quarto exam template — DRAFT
 
-> **Status: draft template.** This repository is a working template for paper-based exams rendered from Quarto to PDF. It is ready to test and adapt, but the formatting and workflow should still be treated as provisional until the teaching team has used it on a real exam and agreed on the final conventions.
+> **Status:** this is a draft teaching-team template. It is usable, but the layout and authoring conventions may still change as we test it on real exams. Please avoid one-off LaTeX fixes inside individual questions; if something repeatedly needs changing, update the template centrally.
 
-The template is designed so that most teaching-team members only need to edit normal Markdown/Quarto files. The LaTeX and Lua files under `_extensions/` control layout and automation and should generally be left alone unless someone is deliberately changing the template itself.
+This repo builds two PDF versions of the same exam:
 
-## What this template does
+- a **student version**, with blank answer boxes; and
+- a **solutions version**, with answers printed inside the same boxes.
 
-The repository supports:
+The main idea is that exam writers should mostly edit ordinary `.qmd` files. The Lua filter and LaTeX preamble handle marks, pagination, headers, answer boxes, section labels, and solution rendering.
 
-- one source for both **student** and **solutions** PDFs;
-- one file per MCQ under `mcq/`;
-- one file per short-answer question under `shortans/`;
-- a dedicated **instructions page** at the start of the exam;
-- an optional **student number** field in the running header on every page;
-- at most **two MCQs per page**;
-- a large, right-aligned MCQ answer rectangle;
-- configurable MCQ answer-box instructions;
-- short-answer questions with automatically labelled subparts `(a)`, `(b)`, `(c)`, ...;
-- independently sized answer boxes for each short-answer subpart; and
-- solutions inserted into the same boxes that are blank in the student version.
+## Normal workflow
 
-## Requirements
+1. Edit exam-wide settings at the top of `exam.qmd`.
+2. Edit the instructions in `instructions/instructions.qmd` if instructions are being used.
+3. Edit individual MCQs in `mcq/`.
+4. Edit individual short-answer questions in `shortans/`.
+5. Make sure any new question file is included in `exam.qmd` in the desired order.
+6. Build both student and solutions PDFs.
+7. Visually inspect the PDFs before release.
 
-You need:
-
-1. [Quarto](https://quarto.org/)
-2. a LaTeX installation capable of producing PDFs
-
-If LaTeX is not already installed, Quarto's TinyTeX installation is usually the simplest option:
-
-```bash
-quarto install tinytex
-```
-
-You can confirm that Quarto is available with:
-
-```bash
-quarto --version
-```
-
-## Typical teaching-team workflow
-
-For most exam editing, the workflow is:
-
-1. edit the exam-wide instructions and options in `exam.qmd`;
-2. edit or replace the individual files in `mcq/` and `shortans/`;
-3. make sure the questions are included in the intended order in `exam.qmd`;
-4. render the **student PDF**;
-5. render the **solutions PDF**;
-6. visually check both PDFs before circulating or printing them.
-
-From the repository root, render with:
+Build from the repository root with:
 
 ```bash
 make student
 make solutions
 ```
 
-or render both at once:
+or build both with:
 
 ```bash
 make all
 ```
 
-The output files are written to:
+The outputs are written to:
 
 ```text
 _output/student/exam.pdf
 _output/solutions/exam.pdf
 ```
 
-You can also call Quarto directly:
+You can also use Quarto directly:
 
 ```bash
 quarto render exam.qmd --profile student
@@ -81,106 +50,130 @@ quarto render exam.qmd --profile solutions
 
 ```text
 .
-├── _quarto.yml
-├── _quarto-student.yml
-├── _quarto-solutions.yml
 ├── exam.qmd
-├── Makefile
-├── README.md
+├── instructions/
+│   └── instructions.qmd
 ├── mcq/
 │   ├── q01.qmd
 │   ├── q02.qmd
-│   ├── ...
-│   └── q20.qmd
+│   └── ...
 ├── shortans/
 │   ├── q21.qmd
 │   ├── q22.qmd
-│   ├── q23.qmd
-│   └── q24.qmd
-└── _extensions/
-    └── exam/
-        ├── exam.lua
-        └── exam-preamble.tex
+│   └── ...
+├── _extensions/
+│   └── exam/
+│       ├── exam.lua
+│       └── exam-preamble.tex
+├── _quarto.yml
+├── _quarto-student.yml
+├── _quarto-solutions.yml
+└── Makefile
 ```
 
-The important distinction is:
+Teaching staff will normally only need to edit `exam.qmd`, `instructions/`, `mcq/`, and `shortans/`.
 
-- `exam.qmd`, `mcq/`, and `shortans/` are the files the teaching team will normally edit;
-- `_extensions/exam/` contains the machinery that makes the template behave as intended.
+## Exam-wide options
 
-## Editing `exam.qmd`
-
-`exam.qmd` is the main assembly file. It contains:
-
-- the exam-level YAML options;
-- the first-page instructions; and
-- the ordered list of question files to include.
-
-The top of the file contains settings such as:
+The top of `exam.qmd` contains the settings that exam writers are most likely to change:
 
 ```yaml
 ---
 title: ""
 format: pdf
 student-number-header: true
+instructions-page: true
+first-page-number: 1
+mcq-points-per-question: 1
 mcq-answer-text: "Write your CAPITAL-letter answer in this box."
+mcq-section-title: "SECTION 1"
+short-answer-section-title: "SECTION 2"
+mcq-extra-pages: 1
+short-answer-extra-pages: 1
 ---
 ```
 
-### Student-number header
+### `student-number-header`
 
-By default, every page contains a writable student-number field in the running header.
-
-Keep it with:
+Use:
 
 ```yaml
 student-number-header: true
 ```
 
-Turn it off with:
+to show the student-number field at the top of every page. Use `false` to remove it. There is deliberately no horizontal rule under the running header.
+
+### `instructions-page`
+
+Use:
 
 ```yaml
-student-number-header: false
+instructions-page: true
 ```
 
-### MCQ answer-box instruction
+to include `instructions/instructions.qmd` as the first page. Use `false` to omit it completely.
 
-The default instruction beside every MCQ response box is:
+### `first-page-number`
 
-> Write your CAPITAL-letter answer in this box.
-
-To change it for the whole exam, change only the YAML entry in `exam.qmd`:
+This controls the number printed on the first page of this PDF. For example:
 
 ```yaml
-mcq-answer-text: "Write one letter in this box."
+first-page-number: 3
 ```
 
-Do not edit every MCQ individually to change this text.
+makes the first page display `Page 3 of X`. The final page number `X` is adjusted consistently, so this works when the exam PDF follows other material that already occupies pages 1–2.
 
-## Instructions page
+### MCQ marks
 
-The opening content in `exam.qmd` is reserved for exam-wide instructions.
+All MCQs currently share one mark value:
 
-Keep information here that applies to the whole exam, such as:
+```yaml
+mcq-points-per-question: 1
+```
 
-- permitted materials;
-- total marks;
-- time allowed;
-- how MCQ answers should be recorded;
-- expectations for showing working; and
-- any other general administrative instructions.
+This is automatically included in every MCQ heading, for example:
 
-A hard page break separates the instructions from the questions, so the first question begins on the next page.
+```text
+Question 1 (1 point)
+```
+
+The complete heading, including the mark value, is underlined.
+
+### Section titles
+
+Defaults are:
+
+```yaml
+mcq-section-title: "SECTION 1"
+short-answer-section-title: "SECTION 2"
+```
+
+Both are printed in bold. Change the text here if a particular exam needs different section labels.
+
+### Additional answer pages
+
+Set the number of additional boxed writing pages after each section with:
+
+```yaml
+mcq-extra-pages: 1
+short-answer-extra-pages: 1
+```
+
+Use `0` if no extra pages are required for a section. Every extra page begins with:
+
+> **This is an extra page that can be used for answering questions**
+
+followed by a large bordered writing area. The final exam page ends with centered bold `END OF EXAM`.
 
 ## Writing an MCQ
 
-Each MCQ lives in its own file. For example, `mcq/q01.qmd` might contain:
+Each MCQ lives in its own file under `mcq/`:
 
 ```markdown
 ::: {.mcq}
 ### Question 1
 
-Question text goes here.
+Which option is correct?
 
 A. First option  
 B. Second option  
@@ -193,260 +186,162 @@ B
 :::
 ```
 
-The content inside `.answer` is the correct answer.
+Do **not** type the marks into the heading. The template reads `mcq-points-per-question` from the exam YAML and produces an underlined heading such as `Question 1 (1 point)`.
 
-In the **student version**, the answer is hidden and the student sees a blank rectangular response box.
+The student PDF places a large rectangular response box to the right of the default instruction:
 
-In the **solutions version**, the same box contains the correct answer.
+> **Write your CAPITAL-letter answer in this box.**
 
-### MCQ conventions
+The wording can be changed globally with `mcq-answer-text` in `exam.qmd`.
 
-For now, please keep to the following conventions:
+In the solutions PDF, the answer inside `.answer` is printed inside the same rectangle.
 
-- use capital letters for options: `A.`, `B.`, `C.`, etc.;
-- put only the correct capital letter inside the `.answer` block;
-- keep each MCQ in a separate file; and
-- do not manually insert page breaks between MCQs.
+The template starts questions 3, 5, 7, and so on on a fresh page. This guarantees no more than two MCQs per page without forcing a blank page after the final MCQ.
 
-The template automatically inserts a page break after every second MCQ, giving a maximum of two MCQs per page.
+## Adding or reordering MCQs
 
-## Adding another MCQ
-
-Suppose you want to add Question 21.
-
-1. Create a new file:
+Create a new file, for example:
 
 ```text
 mcq/q21.qmd
 ```
 
-2. Copy the structure of an existing MCQ and edit the content.
-
-3. Add it to `exam.qmd` in the position where it should appear:
+Then add it to the MCQ part of `exam.qmd`:
 
 ```markdown
 {{< include mcq/q21.qmd >}}
 ```
 
-The question number in the heading is currently written explicitly, so make sure it matches the intended order.
+Question order is determined by the include order in `exam.qmd`, not by filenames alone.
 
 ## Writing a short-answer question
 
-Each short-answer question also lives in its own file. A question can have as many subparts as needed.
-
-For example:
+Short-answer questions also live one per file. The total marks for the question are stored on the outer `.short-answer` block:
 
 ```markdown
-::: {.short-answer}
+::: {.short-answer points="10"}
 ### Question 21
 
-A shared question stem can go here.
+A shared stem can go here.
 
-::: {.part height="5cm"}
-First prompt.
-
-::: {.answer}
-Expected answer to the first prompt.
-:::
-:::
-
-::: {.part height="7cm"}
-Second prompt.
+::: {.part height="5cm" points="4"}
+First subpart prompt.
 
 ::: {.answer}
-Expected answer to the second prompt.
+Solution to the first subpart.
+:::
+:::
+
+::: {.part height="6cm" points="6"}
+Second subpart prompt.
+
+::: {.answer}
+Solution to the second subpart.
 :::
 :::
 :::
 ```
 
-This renders the two subparts as `(a)` and `(b)` automatically.
-
-Do **not** manually type `(a)`, `(b)`, and so on. The lettering resets to `(a)` for every new short-answer question.
-
-## Controlling short-answer box size
-
-Each `.part` has its own `height` setting:
-
-```markdown
-::: {.part height="5cm"}
-```
-
-Use a smaller height for brief responses and a larger height when students need more room.
-
-For example:
+The template renders the heading as an underlined:
 
 ```text
-3cm   short response
-5cm   moderate response
-8cm   longer response
-12cm  substantial response
+Question 21 (10 points)
 ```
 
-These are only rough guides. Always render the PDF and inspect the actual layout.
+Subparts are labelled automatically and reset to `(a)` for every new short-answer question. The example above becomes:
 
-If `height` is omitted, the template currently defaults to `6cm`.
+```text
+(a) [4 points] First subpart prompt.
+(b) [6 points] Second subpart prompt.
+```
 
-## Solutions for short-answer questions
+The `[Z points]` text is bold. Exam writers therefore only supply `points="..."`; they should **not** type `(a)`, `(b)`, or `[Z points]` themselves.
 
-Put the expected solution inside the nested `.answer` block:
+### Answer-box height
+
+Each subpart controls its own writing-space height:
+
+```markdown
+::: {.part height="8cm" points="6"}
+```
+
+Use more height for questions that require more working. In the student version the box is blank; in the solutions version the solution appears inside a box with the same dimensions.
+
+## Instructions page
+
+The instructions live in:
+
+```text
+instructions/instructions.qmd
+```
+
+This keeps the first-page material separate from the question assembly file. If `instructions-page: false`, the file can remain in the repo and is simply omitted from the PDF.
+
+## Section endings and final page
+
+The assembly markers in `exam.qmd` automatically produce:
+
+```text
+END OF SECTION
+```
+
+centered and bold at the end of both Section 1 and Section 2.
+
+Do not manually type these markers into question files. The additional-answer pages and final `END OF EXAM` are also generated centrally.
+
+## Student and solutions versions
+
+The same question files are used for both versions. Keep correct answers inside `.answer` blocks:
 
 ```markdown
 ::: {.answer}
-The expected answer goes here.
+Expected solution here.
 :::
 ```
 
-The student PDF hides this content and leaves the box blank. The solutions PDF places the answer inside the same box.
+The student profile hides this content and leaves blank boxes. The solutions profile prints it inside those boxes.
 
-The solution can contain normal Markdown, including emphasis, lists, equations, and code where appropriate.
+## Files teaching staff normally should not edit
 
-## Adding another short-answer question
-
-To add another question:
-
-1. create a new file in `shortans/`, for example:
-
-```text
-shortans/q25.qmd
-```
-
-2. copy the structure of an existing short-answer question;
-3. add or remove `.part` blocks as required;
-4. set a sensible `height` for each response box; and
-5. add the file to `exam.qmd`:
-
-```markdown
-{{< include shortans/q25.qmd >}}
-```
-
-## Reordering or removing questions
-
-The order of the include statements in `exam.qmd` determines the order of questions in the exam.
-
-To reorder questions, move the relevant include lines.
-
-To remove a question from the exam without deleting its source file, remove or comment out its include line.
-
-Because the top-level question numbers are currently explicit, update the `### Question ...` heading inside each file if the order changes.
-
-Automatic numbering of top-level questions may be added later, but it is deliberately not part of this draft yet.
-
-## What teaching-team members should usually edit
-
-Most contributors should only need to edit:
-
-```text
-exam.qmd
-mcq/*.qmd
-shortans/*.qmd
-```
-
-If you are only writing or revising exam questions, there should normally be no reason to edit the files under `_extensions/`.
-
-## Extending the template itself
-
-The template machinery lives here:
+These files contain the template machinery:
 
 ```text
 _extensions/exam/exam.lua
 _extensions/exam/exam-preamble.tex
+_quarto.yml
+_quarto-student.yml
+_quarto-solutions.yml
 ```
 
-Broadly:
+Change them only when changing the template itself. If one question has a layout problem, first ask whether the underlying rule should be improved for all questions rather than inserting custom LaTeX into that question.
 
-- `exam.lua` controls conditional student/solutions rendering, MCQ pagination, metadata options, and automatic short-answer subpart labels;
-- `exam-preamble.tex` controls PDF layout, margins, headers/footers, typography, and the visual styling of the response boxes.
+## Pre-release checks
 
-Changes here affect the entire exam, so they should be tested against both student and solutions output.
+Before an exam is released, check both PDFs and confirm that:
 
-If extending the template, a useful rule is to keep **content decisions** in the `.qmd` files and **formatting/automation decisions** in the extension files.
+- the instructions page is present or absent as intended;
+- page numbering starts at the intended number and the final `of X` value is correct;
+- the student-number header is present or absent as intended;
+- every MCQ heading has the correct marks;
+- there are no more than two MCQs on a page;
+- MCQ answers in the solutions PDF match the intended options;
+- every short-answer total and subpart mark is correct;
+- short-answer boxes provide enough writing space;
+- every section ends with `END OF SECTION`;
+- the requested number of extra writing pages appears after each section; and
+- the final page ends with `END OF EXAM`.
 
-## Recommended checks before an exam is final
+## Current draft conventions
 
-Before distributing a final exam, the teaching team should check both the student and solutions PDFs for:
+For now, the template assumes:
 
-- correct question order and numbering;
-- correct MCQ answers in the solutions version;
-- solutions matching the intended marking logic;
-- no more than two MCQs on each MCQ page;
-- enough writing space for every short-answer part;
-- no answer box or question awkwardly split across pages;
-- correct student-number-header behaviour;
-- correct instructions on page 1;
-- equations, tables, figures, and code rendering correctly; and
-- page count and print layout looking sensible when viewed at actual size.
+- A4 paper;
+- a PDF output;
+- one common mark value for all MCQs;
+- one student-number field in the running header;
+- at most two MCQs per page;
+- short-answer totals supplied on each question file;
+- short-answer subpart marks and box heights supplied on each `.part`; and
+- additional answer pages configured separately for the two sections.
 
-The PDF should always be inspected visually. A successful Quarto build does not guarantee that the physical exam layout is good.
-
-## Troubleshooting
-
-### `quarto` is not found
-
-Check that Quarto is installed and available on your PATH:
-
-```bash
-quarto --version
-```
-
-### PDF rendering fails because LaTeX is missing
-
-Install TinyTeX:
-
-```bash
-quarto install tinytex
-```
-
-### A question is missing from the PDF
-
-Check that its file is included in `exam.qmd`.
-
-### A solution appears in the student version
-
-Check that the solution is inside a correctly nested:
-
-```markdown
-::: {.answer}
-...
-:::
-```
-
-block.
-
-### Short-answer subparts are not labelled correctly
-
-Check that each subpart uses:
-
-```markdown
-::: {.part height="..."}
-...
-:::
-```
-
-inside a surrounding `.short-answer` block.
-
-### Layout looks wrong after changing the template machinery
-
-Render both versions again:
-
-```bash
-make all
-```
-
-and compare the PDFs carefully. If the issue came from a change under `_extensions/`, revert that change before editing individual questions as a workaround.
-
-## Draft-template notes
-
-This repository is intentionally a **draft** rather than a locked production template. In particular, we may still want to refine:
-
-- typography and spacing;
-- exact answer-box dimensions;
-- instructions-page styling;
-- handling of unusually long MCQs;
-- top-level question numbering;
-- mark allocations and display conventions;
-- figures/tables inside questions;
-- page-break behaviour for long short-answer questions; and
-- any University-specific front-page or examination requirements.
-
-Please flag recurring problems rather than solving them by adding one-off LaTeX to individual question files. If a formatting issue occurs repeatedly, it is better to fix the template once for everyone.
+These are conventions of the current **draft**, not permanent constraints. If the teaching team identifies a better workflow, change the template centrally and update this README.
