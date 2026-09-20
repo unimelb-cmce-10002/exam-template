@@ -1,0 +1,37 @@
+::: {.short-answer}
+### Question 24
+
+Placeholder short-answer question. This example shows four automatically labelled subparts.
+
+::: {.part height="3.5cm"}
+Placeholder prompt for subpart one.
+
+::: {.answer}
+Placeholder solution for subpart one.
+:::
+:::
+
+::: {.part height="3.5cm"}
+Placeholder prompt for subpart two.
+
+::: {.answer}
+Placeholder solution for subpart two.
+:::
+:::
+
+::: {.part height="3.5cm"}
+Placeholder prompt for subpart three.
+
+::: {.answer}
+Placeholder solution for subpart three.
+:::
+:::
+
+::: {.part height="3.5cm"}
+Placeholder prompt for subpart four.
+
+::: {.answer}
+Placeholder solution for subpart four.
+:::
+:::
+:::

@@ -1,0 +1,14 @@
+::: {.mcq}
+### Question 16
+
+Placeholder multiple-choice question 16. Replace this text with the question stem.
+
+A. Placeholder option A  
+B. Placeholder option B  
+C. Placeholder option C  
+D. Placeholder option D
+
+::: {.answer}
+A
+:::
+:::

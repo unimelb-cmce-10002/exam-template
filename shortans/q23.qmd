@@ -1,0 +1,21 @@
+::: {.short-answer}
+### Question 23
+
+Placeholder short-answer question. Subpart labels are generated automatically when the exam is compiled.
+
+::: {.part height="6cm"}
+Placeholder prompt for the first subpart.
+
+::: {.answer}
+Placeholder solution for the first subpart.
+:::
+:::
+
+::: {.part height="6cm"}
+Placeholder prompt for the second subpart.
+
+::: {.answer}
+Placeholder solution for the second subpart.
+:::
+:::
+:::

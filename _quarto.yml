@@ -1,0 +1,23 @@
+project:
+  type: default
+
+format:
+  pdf:
+    documentclass: article
+    papersize: a4
+    fontsize: 11pt
+    geometry:
+      - top=18mm
+      - bottom=18mm
+      - left=20mm
+      - right=20mm
+    include-in-header: _extensions/exam/exam-preamble.tex
+    keep-tex: true
+
+filters:
+  - _extensions/exam/exam.lua
+
+execute:
+  echo: false
+
+solutions: false

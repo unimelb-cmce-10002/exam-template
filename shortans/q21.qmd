@@ -1,0 +1,21 @@
+::: {.short-answer}
+### Question 21
+
+Placeholder short-answer question with a shared stem. Replace this text with any context that applies to all subparts.
+
+::: {.part height="5cm"}
+Placeholder prompt for the first subpart.
+
+::: {.answer}
+Placeholder solution for the first subpart.
+:::
+:::
+
+::: {.part height="5cm"}
+Placeholder prompt for the second subpart.
+
+::: {.answer}
+Placeholder solution for the second subpart.
+:::
+:::
+:::
