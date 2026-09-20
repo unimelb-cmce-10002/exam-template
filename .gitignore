@@ -6,3 +6,4 @@
 *.tex
 
 **/*.quarto_ipynb
+.Rproj*
