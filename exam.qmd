@@ -6,6 +6,7 @@ instructions-page: true
 first-page-number: 1
 mcq-points-per-question: 1
 mcq-answer-text: "Write your CAPITAL-letter answer in this box."
+mcq-option-spacing: "0.5em"
 mcq-section-title: "SECTION 1"
 short-answer-section-title: "SECTION 2"
 mcq-extra-pages: 1

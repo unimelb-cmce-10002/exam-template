@@ -7,6 +7,7 @@ local show_solutions = false
 local show_student_number_header = true
 local show_instructions_page = true
 local mcq_answer_text_latex = "Write your CAPITAL-letter answer in this box."
+local mcq_option_spacing = "0.5em"
 local mcq_section_title_latex = "SECTION 1"
 local short_answer_section_title_latex = "SECTION 2"
 local mcq_points = "1 point"
@@ -136,6 +137,151 @@ local function render_short_answer(div)
   return out
 end
 
+
+local function option_letter_from_inlines(inlines)
+  if not inlines or #inlines == 0 then return nil end
+  local first = inlines[1]
+  if not first or first.t ~= "Str" then return nil end
+  return first.text:match("^([A-Z])%.$")
+end
+
+local function expected_option_letter(n)
+  if n < 1 or n > 26 then return nil end
+  return string.char(64 + n)
+end
+
+local function split_hardbreak_option_paragraph(block)
+  if block.t ~= "Para" or #block.content == 0 then return nil end
+
+  local lines = {}
+  local current = pandoc.Inlines({})
+  for _, inline in ipairs(block.content) do
+    if inline.t == "LineBreak" then
+      lines[#lines + 1] = current
+      current = pandoc.Inlines({})
+    else
+      current:insert(inline)
+    end
+  end
+  lines[#lines + 1] = current
+
+  if #lines < 2 then return nil end
+  for i, line in ipairs(lines) do
+    if option_letter_from_inlines(line) ~= expected_option_letter(i) then return nil end
+  end
+
+  local groups = {}
+  for _, line in ipairs(lines) do
+    groups[#groups + 1] = pandoc.Blocks({pandoc.Para(line)})
+  end
+  return groups
+end
+
+local function empty_alpha_list_marker_letter(block)
+  if block.t ~= "OrderedList" then return nil end
+  if tostring(block.style) ~= "UpperAlpha" or tostring(block.delimiter) ~= "Period" then return nil end
+  if #block.content ~= 1 or #block.content[1] ~= 0 then return nil end
+  local start = tonumber(block.start)
+  return expected_option_letter(start)
+end
+
+local function option_marker_letter(block)
+  if block.t == "Para" and #block.content > 0 then
+    return option_letter_from_inlines(block.content)
+  end
+  return empty_alpha_list_marker_letter(block)
+end
+
+local function block_starts_option(block, expected_letter)
+  return option_marker_letter(block) == expected_letter
+end
+
+local function normalized_option_marker_block(block, letter)
+  -- Markdown interprets a standalone `A.` as an empty alphabetic ordered-list
+  -- item. Convert that parser representation back into the simple label the
+  -- exam author intended, while retaining normal `A. text` paragraphs as-is.
+  if block.t == "OrderedList" then
+    return pandoc.Para({pandoc.Str(letter .. ".")})
+  end
+  return block
+end
+
+-- Split MCQ content into stem blocks and option groups. This supports both:
+--   A. inline option text  \\ hard line break
+--   B. inline option text
+-- and block-style options such as:
+--   A.
+--
+--   ```r
+--   some_code()
+--   ```
+-- The latter lets an option contain code, equations, lists, tables, etc.
+local function split_mcq_stem_and_options(blocks)
+  local stem = pandoc.Blocks({})
+  local groups = nil
+  local i = 1
+
+  while i <= #blocks do
+    local block = blocks[i]
+
+    -- Existing compact syntax: all options in one hard-broken paragraph.
+    local hardbreak_groups = split_hardbreak_option_paragraph(block)
+    if hardbreak_groups then
+      groups = hardbreak_groups
+      for j = i + 1, #blocks do
+        -- Anything after the compact option paragraph is retained as part of
+        -- the final option. This is unusual, but avoids silently discarding it.
+        groups[#groups]:insert(blocks[j])
+      end
+      return stem, groups
+    end
+
+    -- Block-style syntax begins with A. and then expects B., C., ...
+    if block_starts_option(block, "A") then
+      groups = {}
+      local option_number = 1
+      local current = pandoc.Blocks({})
+
+      while i <= #blocks do
+        block = blocks[i]
+        local expected = expected_option_letter(option_number)
+        if block_starts_option(block, expected) then
+          if #current > 0 then groups[#groups + 1] = current end
+          current = pandoc.Blocks({normalized_option_marker_block(block, expected)})
+          option_number = option_number + 1
+        else
+          -- If a later paragraph begins with a different option label, the
+          -- sequence is malformed; treat the whole thing as ordinary content.
+          local actual = option_marker_letter(block)
+          if actual ~= nil and actual ~= expected then
+            return blocks, nil
+          end
+          current:insert(block)
+        end
+        i = i + 1
+      end
+
+      if #current > 0 then groups[#groups + 1] = current end
+      if #groups >= 2 then return stem, groups end
+      return blocks, nil
+    end
+
+    stem:insert(block)
+    i = i + 1
+  end
+
+  return stem, nil
+end
+
+local function append_mcq_options(out, groups)
+  for i, group in ipairs(groups) do
+    if i > 1 and mcq_option_spacing ~= "0em" and mcq_option_spacing ~= "0" then
+      out:insert(pandoc.RawBlock("latex", "\\vspace{" .. mcq_option_spacing .. "}"))
+    end
+    append_blocks(out, group)
+  end
+end
+
 local function render_mcq(div)
   mcq_count = mcq_count + 1
   local body, answer = split_answer(div.content)
@@ -146,23 +292,29 @@ local function render_mcq(div)
     answer_tex = latex_from_blocks(answer):gsub("%s+$", "")
   end
 
+  -- TeX measures the complete MCQ before placing it. This keeps the question
+  -- together, starts a new page when the remaining space is insufficient, and
+  -- enforces a maximum of two MCQs on a physical page.
+  out:insert(pandoc.RawBlock("latex", "\\begin{exammcqbox}"))
+
+  local content = pandoc.Blocks({})
   for _, block in ipairs(body) do
     if block.t == "Header" then
       out:insert(question_heading_from_header(block, mcq_points))
     else
-      out:insert(block)
+      content:insert(block)
     end
   end
 
-  out:insert(pandoc.RawBlock("latex", "\\mcqanswer{" .. answer_tex .. "}{" .. mcq_answer_text_latex .. "}"))
-
-  -- Start each new pair of MCQs on a fresh page. Putting the break before
-  -- questions 3, 5, ... avoids creating a blank page after the final MCQ.
-  if mcq_count > 1 and mcq_count % 2 == 1 then
-    out:insert(1, pandoc.RawBlock("latex", "\\newpage"))
-  elseif mcq_count % 2 == 1 then
-    out:insert(pandoc.RawBlock("latex", "\\Needspace{0.38\\textheight}"))
+  local stem, option_groups = split_mcq_stem_and_options(content)
+  append_blocks(out, stem)
+  if option_groups then
+    out:insert(pandoc.RawBlock("latex", "\\exammcqinstruction"))
+    append_mcq_options(out, option_groups)
   end
+
+  out:insert(pandoc.RawBlock("latex", "\\mcqanswer{" .. answer_tex .. "}{" .. mcq_answer_text_latex .. "}"))
+  out:insert(pandoc.RawBlock("latex", "\\end{exammcqbox}"))
   return out
 end
 
@@ -217,6 +369,7 @@ function Pandoc(doc)
   short_answer_extra_pages = math.max(0, math.floor(metadata_number(doc.meta["short-answer-extra-pages"], 0)))
   mcq_points = points_label(pandoc.utils.stringify(doc.meta["mcq-points-per-question"] or "1"))
   mcq_answer_text_latex = metadata_text_to_latex(doc.meta["mcq-answer-text"], "Write your CAPITAL-letter answer in this box.")
+  mcq_option_spacing = pandoc.utils.stringify(doc.meta["mcq-option-spacing"] or "0.5em")
   mcq_section_title_latex = metadata_text_to_latex(doc.meta["mcq-section-title"], "SECTION 1")
   short_answer_section_title_latex = metadata_text_to_latex(doc.meta["short-answer-section-title"], "SECTION 2")
 

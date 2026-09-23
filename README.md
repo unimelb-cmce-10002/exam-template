@@ -86,6 +86,7 @@ instructions-page: true
 first-page-number: 1
 mcq-points-per-question: 1
 mcq-answer-text: "Write your CAPITAL-letter answer in this box."
+mcq-option-spacing: "0.5em"
 mcq-section-title: "SECTION 1"
 short-answer-section-title: "SECTION 2"
 mcq-extra-pages: 1
@@ -186,7 +187,39 @@ B
 :::
 ```
 
-Do **not** type the marks into the heading. The template reads `mcq-points-per-question` from the exam YAML and produces an underlined heading such as `Question 1 (1 point)`.
+Do **not** type the marks into the heading. The template reads `mcq-points-per-question` from the exam YAML and produces an underlined heading such as `Question 1 (1 point)`. A full line of whitespace is inserted automatically between the heading and the start of the question stem.
+
+The sentence `Select the best answer from the following options` is also inserted automatically between the question stem and the options, with a full line of whitespace above and below it. Do **not** type this sentence into individual MCQ files.
+
+For ordinary text options, keep using the compact syntax above. If an option needs block content such as code, put the option label on its own line and then write the block beneath it. For example:
+
+````markdown
+A.
+
+```r
+x <- 1:5
+```
+
+B.
+
+```r
+x <- c(1, 5)
+```
+
+C.
+
+```r
+x <- seq(1, 5, by = 5)
+```
+
+D.
+
+```r
+x <- "1:5"
+```
+````
+
+The template recognises the standalone `A.`–`D.` labels automatically. The same approach can be used for multi-line equations, lists, tables, or other block content.
 
 The student PDF places a large rectangular response box to the right of the default instruction:
 
@@ -196,7 +229,9 @@ The wording can be changed globally with `mcq-answer-text` in `exam.qmd`.
 
 In the solutions PDF, the answer inside `.answer` is printed inside the same rectangle.
 
-The template starts questions 3, 5, 7, and so on on a fresh page. This guarantees no more than two MCQs per page without forcing a blank page after the final MCQ.
+The template keeps every MCQ together and allows **at most two MCQs on a physical page**. Before placing a question, the PDF template measures its rendered height. If the complete question will not fit in the space remaining, it moves to the next page. The count then resets on that physical page, so the layout can recover naturally after a long question. For example, a long Question 1 may occupy a page by itself, while Questions 2 and 3 can share the following page if they fit.
+
+An individual MCQ should still be short enough to fit on one full page. If a single question genuinely needs more than a page, it should be redesigned or handled as a special case rather than relying on the automatic MCQ layout.
 
 ## Adding or reordering MCQs
 
@@ -345,3 +380,8 @@ For now, the template assumes:
 - additional answer pages configured separately for the two sections.
 
 These are conventions of the current **draft**, not permanent constraints. If the teaching team identifies a better workflow, change the template centrally and update this README.
+
+
+### MCQ option spacing
+
+MCQ options are automatically given extra vertical whitespace when written as `A.`, `B.`, `C.`, etc. No LaTeX is required in individual question files. Compact text options can remain on hard-broken lines, while standalone labels can introduce block content such as code. Control the amount globally with `mcq-option-spacing` in `exam.qmd`; use `"0em"` to disable it.
